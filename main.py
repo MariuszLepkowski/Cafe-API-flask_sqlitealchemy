@@ -30,13 +30,18 @@ with app.app_context():
     db.create_all()
 
 
-def row_to_dict(row):
-    """Converts row from a table to a dictionary."""
+def row_to_dict(row_or_rows):
+    """Converts row(s) from a table to a dictionary or list of dictionaries."""
+    if isinstance(row_or_rows, list):
+        return [row_to_dict(row) for row in row_or_rows]
+
+    row = row_or_rows
     dict = {}
     for column in row.__table__.columns:
         dict[column.name] = str(getattr(row, column.name))
 
     return dict
+
 
 @app.route("/")
 def home():
@@ -51,6 +56,21 @@ def get_random_cafe():
     random_cafe = row_to_dict(choice(cafes))
 
     return jsonify(random_cafe)
+
+
+@app.route("/search")
+def search_for_cafe():
+    """Returns cafes in a chosen location."""
+    location = request.args.get('loc').title()
+
+    search_results = db.session.execute(db.select(Cafe).where(Cafe.location == location)).scalars().all()
+    if search_results:
+        search_results_dict = row_to_dict(search_results)
+        return jsonify(search_results_dict)
+    else:
+        return jsonify(error= {"Not found": "Sorry, we don't have a cafe at this location."})
+
+
 
 ## HTTP POST - Create Record
 
