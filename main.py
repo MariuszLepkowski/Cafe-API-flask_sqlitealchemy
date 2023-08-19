@@ -50,6 +50,12 @@ def home():
 
 ## HTTP GET - Read Record
 
+@app.route("/all")
+def get_all_cafes():
+    result = db.session.execute(db.select(Cafe).order_by(Cafe.name))
+    all_cafes = result.scalars().all()
+    return jsonify(cafes=[row_to_dict(cafe) for cafe in all_cafes])
+
 @app.route("/random")
 def get_random_cafe():
     cafes = db.session.execute(db.select(Cafe).order_by(Cafe.name)).scalars().all()
