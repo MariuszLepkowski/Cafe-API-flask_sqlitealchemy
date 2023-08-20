@@ -116,7 +116,8 @@ def update_coffee_price(cafe_id):
             "error": "cafe not found",
             "message": "Sorry the cafe with that id was not found in the database"
         }
-        return jsonify(error_response), 200
+        return jsonify(error_response), 404
+
 
 
 ## HTTP DELETE - Delete Record
