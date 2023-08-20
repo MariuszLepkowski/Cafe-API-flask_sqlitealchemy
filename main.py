@@ -1,3 +1,4 @@
+import sqlalchemy
 from flask import Flask, jsonify, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from random import choice
@@ -101,8 +102,21 @@ def add_cafe():
 ## HTTP PUT/PATCH - Update Record
 
 @app.route("/update-price/<cafe_id>", methods=['PATCH'])
-def update_coffee_price():
-    """Updates coffee price in a cafe woth a particular id."""
+def update_coffee_price(cafe_id):
+    """Updates coffee price in a cafe with a particular id."""
+    try:
+        cafe = Cafe.query.filter_by(id=cafe_id).one()
+        new_price = request.args.get('new_price')
+        cafe.coffee_price = new_price
+        db.session.commit()
+        return jsonify({"message": "Coffee price updated successfully"}), 200
+
+    except sqlalchemy.orm.exc.NoResultFound:
+        error_response = {
+            "error": "cafe not found",
+            "message": "Sorry the cafe with that id was not found in the database"
+        }
+        return jsonify(error_response), 200
 
 
 ## HTTP DELETE - Delete Record
